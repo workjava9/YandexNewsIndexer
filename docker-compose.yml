@@ -1,15 +1,26 @@
 services:
-  postgres:
-    image: postgres:16
-    container_name: yandex_postgres
-    environment:
-      POSTGRES_DB: newsindexers
-      POSTGRES_USER: indexer
-      POSTGRES_PASSWORD: indexer
+  kafka:
+    image: confluentinc/cp-kafka:7.6.0
+    container_name: yandex_kafka
     ports:
-      - "5433:5432"
+      - "9092:9092"
+    environment:
+      KAFKA_KRAFT_MODE: "true"
+      KAFKA_PROCESS_ROLES: "broker,controller"
+      KAFKA_NODE_ID: 1
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@localhost:9093"
+      KAFKA_LISTENERS: "PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093"
+      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://yandex_kafka:9092"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT"
+      KAFKA_INTER_BROKER_LISTENER_NAME: "PLAINTEXT"
+      KAFKA_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
+      KAFKA_LOG_DIRS: "/tmp/kraft-combined-logs"
+      CLUSTER_ID: "Eis4AI3qQV6eUufGLOTryg"
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+
     volumes:
-      - pg_data:/var/lib/postgresql/data
+      - /tmp/kafka-data:/tmp/kraft-combined-logs
+
 
   redis:
     image: redis:7-alpine
@@ -17,26 +28,35 @@ services:
     ports:
       - "6379:6379"
 
-  zookeeper:
-    image: confluentinc/cp-zookeeper:7.6.0
-    container_name: yandex_zookeeper
+  postgres:
+    image: postgres:16
+    container_name: yandex_postgres
     environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_TICK_TIME: 2000
-
-  kafka:
-    image: confluentinc/cp-kafka:7.6.0
-    container_name: yandex_kafka
-    depends_on:
-      - zookeeper
+      POSTGRES_DB: newsindexers
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: super1234
     ports:
-      - "9092:9092"
+      - "5433:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: yandex_app
+    ports:
+      - "8080:8080"
+    depends_on:
+      - kafka
+      - redis
+      - postgres
     environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: yandex_zookeeper:2181
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      SPRING_DATASOURCE_URL: jdbc:postgresql://yandex_postgres:5432/newsindexers
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: super1234
+      SPRING_REDIS_HOST: yandex_redis
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: yandex_kafka:9092
 
 volumes:
   pg_data:

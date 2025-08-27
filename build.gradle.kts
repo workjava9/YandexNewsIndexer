@@ -37,7 +37,6 @@ dependencies {
         implementation("org.apache.commons:commons-lang3:3.14.0")
         implementation("commons-io:commons-io:2.15.1")
         implementation("io.github.microutils:kotlin-logging-jvm:3.0.5")
-        runtimeOnly("org.slf4j:slf4j-simple:2.0.13")
         implementation("com.fasterxml.jackson.module:jackson-module-parameter-names")
         implementation("org.yaml:snakeyaml:2.2")
 
