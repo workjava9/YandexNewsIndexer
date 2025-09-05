@@ -15,12 +15,10 @@ services:
       KAFKA_INTER_BROKER_LISTENER_NAME: "PLAINTEXT"
       KAFKA_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
       KAFKA_LOG_DIRS: "/tmp/kraft-combined-logs"
-      CLUSTER_ID: "Eis4AI3qQV6eUufGLOTryg"
+      CLUSTER_ID: "${KAFKA_CLUSTER_ID}"
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
-
     volumes:
-      - /tmp/kafka-data:/tmp/kraft-combined-logs
-
+      - kafka_data:/tmp/kraft-combined-logs
 
   redis:
     image: redis:7-alpine
@@ -32,9 +30,9 @@ services:
     image: postgres:16
     container_name: yandex_postgres
     environment:
-      POSTGRES_DB: newsindexers
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: super1234
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - "5433:5432"
     volumes:
@@ -42,8 +40,8 @@ services:
 
   app:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ../../Downloads/YandexNewsIndexer-with-auth
+      dockerfile: ../../Downloads/YandexNewsIndexer-with-auth/Dockerfile
     container_name: yandex_app
     ports:
       - "8080:8080"
@@ -51,12 +49,9 @@ services:
       - kafka
       - redis
       - postgres
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://yandex_postgres:5432/newsindexers
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: super1234
-      SPRING_REDIS_HOST: yandex_redis
-      SPRING_KAFKA_BOOTSTRAP_SERVERS: yandex_kafka:9092
+    env_file:
+      - ../../Downloads/YandexNewsIndexer-with-auth/.env
 
 volumes:
   pg_data:
+  kafka_data:

@@ -1,4 +1,3 @@
-# === Java ===
 *.class
 *.log
 *.jar
@@ -7,59 +6,49 @@
 hs_err_pid*
 replay_pid*
 
-# === Gradle ===
 .gradle/
 build/
 !gradle/wrapper/gradle-wrapper.jar
 
-# === Kotlin DSL ===
 *.kts~
 
-# === IntelliJ IDEA ===
 .idea/
 *.iml
 *.iws
 out/
 *.ipr
 
-# === VS Code ===
 .vscode/
 
-# === OS system ===
 .DS_Store
 Thumbs.db
 
-# === Logs & Reports ===
 logs/
 *.csv
 *.out
 *.pid
 
-# === Spring Boot ===
 /target/
 .spring-boot-devtools.properties
 
-# === Test / Coverage ===
 test-output/
 coverage/
 jacoco.exec
 
-# === Docker ===
 *.env
 .env
 .env.*
 docker-compose.override.yml
 **/docker/*.local.yml
 
-# === Redis / PostgreSQL / Kafka volumes ===
 /data/
 pg_data/
 redis_data/
 kafka_data/
 
-# === Misc ===
 *.swp
 *.swo
 *.bak
 *.tmp
 *.orig
+
